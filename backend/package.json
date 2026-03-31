@@ -1,0 +1,26 @@
+{
+  "name": "onemorecoin-backend",
+  "version": "2.0.0",
+  "description": "REST API backend for OnMoreCoin app using Node.js, Express, and PostgreSQL",
+  "main": "src/server.js",
+  "scripts": {
+    "start": "node src/server.js",
+    "dev": "node --watch src/server.js",
+    "init-db": "node src/scripts/initDb.js"
+  },
+  "dependencies": {
+    "bcryptjs": "^2.4.3",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.5",
+    "express": "^4.21.0",
+    "express-rate-limit": "^7.4.0",
+    "jsonwebtoken": "^9.0.2",
+    "morgan": "^1.10.0",
+    "pg": "^8.13.0",
+    "uuid": "^10.0.0",
+    "winston": "^3.14.0"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}
