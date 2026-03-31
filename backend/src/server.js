@@ -19,6 +19,9 @@ const syncRoutes = require('./routes/sync');
 const app = express();
 const PORT = process.env.PORT || 3000;
 
+// Trust reverse proxy (Render load balancer)
+app.set('trust proxy', 1);
+
 // ========================
 // WINSTON LOGGER
 // ========================

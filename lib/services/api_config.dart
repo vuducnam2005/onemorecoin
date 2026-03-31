@@ -5,8 +5,8 @@
 /// - Thiết bị thật (cùng Wi-Fi): http://<IP_máy_tính>:3000
 /// - Production: https://api.yourdomain.com
 class ApiConfig {
-  // Đổi IP này cho phù hợp với môi trường của bạn
-  static const String baseUrl = 'http://10.0.2.2:3000';
+  // Render Cloud Deployment
+  static const String baseUrl = 'https://onemorecoin.onrender.com';
 
   // Auth endpoints
   static const String login = '$baseUrl/auth/login';
