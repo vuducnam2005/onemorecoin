@@ -19,6 +19,8 @@ async function initDatabase() {
         email VARCHAR(255) UNIQUE NOT NULL,
         password VARCHAR(255) NOT NULL,
         "displayName" VARCHAR(255),
+        role VARCHAR(20) DEFAULT 'user',
+        "isLocked" BOOLEAN DEFAULT false,
         "createdAt" TIMESTAMP DEFAULT NOW()
       )
     `);
@@ -200,6 +202,18 @@ async function initDatabase() {
       )
     `);
     console.log('✅ Table: refresh_tokens');
+
+    // Data Deletion Requests table
+    await client.query(`
+      CREATE TABLE IF NOT EXISTS data_deletion_requests (
+        id SERIAL PRIMARY KEY,
+        "userId" VARCHAR(255) NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+        status VARCHAR(20) DEFAULT 'pending',
+        "createdAt" TIMESTAMP DEFAULT NOW(),
+        "processedAt" TIMESTAMP
+      )
+    `);
+    console.log('✅ Table: data_deletion_requests');
 
     console.log('\n🎉 All tables created successfully!');
     process.exit(0);

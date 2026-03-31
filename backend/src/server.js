@@ -15,6 +15,7 @@ const budgetRoutes = require('./routes/budgets');
 const loanRoutes = require('./routes/loans');
 const reminderRoutes = require('./routes/reminders');
 const syncRoutes = require('./routes/sync');
+const adminRoutes = require('./routes/admin');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -126,6 +127,7 @@ app.use('/budgets', budgetRoutes);
 app.use('/loans', loanRoutes);
 app.use('/reminders', reminderRoutes);
 app.use('/sync', syncLimiter, syncRoutes);
+app.use('/admin', adminRoutes);
 
 // Health check
 app.get('/health', (req, res) => {

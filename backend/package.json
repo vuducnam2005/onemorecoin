@@ -6,7 +6,10 @@
   "scripts": {
     "start": "node src/server.js",
     "dev": "node --watch src/server.js",
-    "init-db": "node src/scripts/initDb.js"
+    "init-db": "node src/scripts/initDb.js",
+    "migrate-role": "node src/scripts/migrate-add-role.js",
+    "migrate-delete-requests": "node src/scripts/migrate-add-delete-requests.js",
+    "make-admin": "node src/scripts/make-admin.js"
   },
   "dependencies": {
     "bcryptjs": "^2.4.3",

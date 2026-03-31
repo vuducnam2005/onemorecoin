@@ -80,7 +80,7 @@ router.post('/register', async (req, res) => {
       message: 'Đăng ký thành công',
       token: accessToken,
       refreshToken,
-      user: { id, username, email, displayName: displayName || username },
+      user: { id, username, email, displayName: displayName || username, role: 'user' },
     });
   } catch (err) {
     console.error('Register error:', err);
@@ -108,6 +108,12 @@ router.post('/login', async (req, res) => {
     }
 
     const user = result.rows[0];
+
+    // Check if account is locked
+    if (user.isLocked) {
+      return res.status(403).json({ error: 'Tài khoản đã bị khóa. Liên hệ admin để được hỗ trợ.' });
+    }
+
     const isMatch = await bcrypt.compare(password, user.password);
 
     if (!isMatch) {
@@ -126,6 +132,7 @@ router.post('/login', async (req, res) => {
         username: user.username,
         email: user.email,
         displayName: user.displayName,
+        role: user.role,
       },
     });
   } catch (err) {
@@ -282,6 +289,82 @@ router.put('/profile', authMiddleware, async (req, res) => {
     res.json({ message: 'Cập nhật thành công' });
   } catch (err) {
     console.error('Update profile error:', err);
+    res.status(500).json({ error: 'Lỗi hệ thống' });
+  }
+});
+
+// ========================
+// DATA DELETION REQUESTS
+// ========================
+
+// POST /auth/request-delete-data — User gửi yêu cầu xoá dữ liệu
+router.post('/request-delete-data', authMiddleware, async (req, res) => {
+  try {
+    // Check if there's already a pending request
+    const existing = await pool.query(
+      `SELECT id, status, "createdAt" FROM data_deletion_requests WHERE "userId" = $1 AND status = 'pending'`,
+      [req.userId]
+    );
+
+    if (existing.rows.length > 0) {
+      return res.status(400).json({ 
+        error: 'Bạn đã có yêu cầu đang chờ phê duyệt',
+        request: existing.rows[0]
+      });
+    }
+
+    const result = await pool.query(
+      `INSERT INTO data_deletion_requests ("userId", status) VALUES ($1, 'pending') RETURNING *`,
+      [req.userId]
+    );
+
+    res.status(201).json({
+      message: 'Đã gửi yêu cầu xoá dữ liệu. Vui lòng chờ Admin phê duyệt.',
+      request: result.rows[0],
+    });
+  } catch (err) {
+    console.error('Request delete data error:', err);
+    res.status(500).json({ error: 'Lỗi hệ thống' });
+  }
+});
+
+// GET /auth/delete-request-status — User kiểm tra trạng thái yêu cầu
+router.get('/delete-request-status', authMiddleware, async (req, res) => {
+  try {
+    const result = await pool.query(
+      `SELECT id, status, "createdAt", "processedAt" FROM data_deletion_requests WHERE "userId" = $1 ORDER BY "createdAt" DESC LIMIT 1`,
+      [req.userId]
+    );
+
+    if (result.rows.length === 0) {
+      return res.json({ hasRequest: false });
+    }
+
+    res.json({
+      hasRequest: true,
+      request: result.rows[0],
+    });
+  } catch (err) {
+    console.error('Get delete request status error:', err);
+    res.status(500).json({ error: 'Lỗi hệ thống' });
+  }
+});
+
+// DELETE /auth/withdraw-delete-request — User thu hồi yêu cầu
+router.delete('/withdraw-delete-request', authMiddleware, async (req, res) => {
+  try {
+    const result = await pool.query(
+      `DELETE FROM data_deletion_requests WHERE "userId" = $1 AND status = 'pending' RETURNING id`,
+      [req.userId]
+    );
+
+    if (result.rows.length === 0) {
+      return res.status(404).json({ error: 'Không có yêu cầu nào đang chờ để thu hồi' });
+    }
+
+    res.json({ message: 'Đã thu hồi yêu cầu xoá dữ liệu' });
+  } catch (err) {
+    console.error('Withdraw delete request error:', err);
     res.status(500).json({ error: 'Lỗi hệ thống' });
   }
 });
