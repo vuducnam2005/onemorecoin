@@ -84,7 +84,7 @@ router.post('/register', async (req, res) => {
     });
   } catch (err) {
     console.error('Register error:', err);
-    res.status(500).json({ error: 'Lỗi hệ thống', debug: err.message, code: err.code });
+    res.status(500).json({ error: 'Lỗi hệ thống' });
   }
 });
 
